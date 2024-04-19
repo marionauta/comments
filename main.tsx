@@ -3,6 +3,7 @@ import { JSX } from "https://esm.sh/preact@10.20.2";
 import { render } from "https://esm.sh/preact-render-to-string@6.4.2";
 import { STATUS_CODE } from "deno/http/status.ts";
 import * as logger from "deno/log/mod.ts";
+import { TelegramBot } from "telegram/mod.ts";
 
 const db = new DB(Deno.env.get("COMMENTS_DATABASE") ?? "comments.db");
 db.execute(`
@@ -15,6 +16,9 @@ db.execute(`
     body text not null
   )
 `);
+
+const tgId = Deno.env.get("TELEGRAM_CHAT_ID") ?? "";
+const bot = new TelegramBot(Deno.env.get("TELEGRAM_BOT_TOKEN") ?? "");
 
 export type CommHandler = (
   request: Request,
@@ -104,6 +108,12 @@ const postComment: CommHandler = async (request) => {
       "insert into comments (hostname, pathname, body, author_name) values (?, ?, ?, ?)",
       [hostname, pathname, comment, author_name],
     );
+    const update = `Comment by '${author_name}': '${comment}' @ ${hostname}`;
+    logger.info(update);
+    bot.sendMessage({
+      chat_id: tgId,
+      text: update,
+    });
   }
   return (
     <div

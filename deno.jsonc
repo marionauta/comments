@@ -6,7 +6,8 @@
   "imports": {
     "@/": "./src/",
     "deno/": "https://deno.land/std@0.223.0/",
-    "sqlite/": "https://deno.land/x/sqlite@v3.8/"
+    "sqlite/": "https://deno.land/x/sqlite@v3.8/",
+    "telegram/": "https://deno.land/x/telegram_bot_api@0.4.0/"
   },
   "tasks": {
     "dev": "deno run -A --watch main.tsx",
