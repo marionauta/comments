@@ -40,7 +40,7 @@ const getServerHost = (request: Request): string => {
   const https = request.headers.get("origin")?.includes("https") ?? true;
   const base = request.headers.get("host") ?? "comments.nachbaur.dev";
   return `${https ? "https" : "http"}://${base}`;
-}
+};
 
 const getHostAndPathname = (request: Request): [string, string] => {
   const currentUrl = request.headers.get("hx-current-url");
@@ -66,7 +66,7 @@ const CommentForm = ({ serverHost }: { serverHost: string }) => (
 type CommentSectionProps = {
   comments: Comment[];
   serverHost: string;
-}
+};
 
 const CommentSection = ({ comments, serverHost }: CommentSectionProps) => (
   <div id="comments">
@@ -74,7 +74,11 @@ const CommentSection = ({ comments, serverHost }: CommentSectionProps) => (
     <CommentForm serverHost={serverHost} />
     <div class="comments">
       {comments.map((comment) => <Comment comment={comment} />)}
-      {!comments.length && <span>Aun no hay comentarios.</span>}
+      {!comments.length && (
+        <div class="comment">
+          <span class="comment--body">Aun no hay comentarios.</span>
+        </div>
+      )}
     </div>
   </div>
 );
