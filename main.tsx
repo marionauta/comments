@@ -6,6 +6,8 @@ import { STATUS_CODE } from "deno/http/status.ts";
 import * as logger from "deno/log/mod.ts";
 import { TelegramBot } from "telegram/mod.ts";
 
+// db
+
 const db = new DB(Deno.env.get("COMMENTS_DATABASE") ?? "comments.db");
 db.execute(`
   create table if not exists comments (
@@ -17,6 +19,8 @@ db.execute(`
     body text not null
   );
 `);
+
+// telegram
 
 const tgId = Deno.env.get("TELEGRAM_CHAT_ID");
 const tgToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
@@ -40,7 +44,9 @@ const sendTelegramMessage = (message: string) => {
   });
 };
 
-export type CommHandler = (
+// types
+
+type CommHandler = (
   request: Request,
 ) => JSX.Element | Promise<JSX.Element>;
 
@@ -50,15 +56,7 @@ type Comment = {
   body: string;
 };
 
-const Comment = ({ comment }: { comment: Comment }) => (
-  <div class="comment">
-    <span class="comment--author-name">{comment.author_name || "Anónimo"}</span>
-    <span class="comment--created-at">
-      {new Date(comment.created_at * 1000).toLocaleDateString("es")}
-    </span>
-    <span class="comment--body">{comment.body}</span>
-  </div>
-);
+// utils
 
 const getServerHost = (request: Request): string => {
   const https = request.headers.get("origin")?.includes("https") ?? true;
@@ -74,6 +72,22 @@ const getHostAndPathname = (request: Request): [string, string] => {
   const parsed = new URL(currentUrl);
   return [parsed.hostname, parsed.pathname];
 };
+
+// components
+
+type SingleCommentProps = {
+  comment: Comment;
+};
+
+const SingleComment = ({ comment }: SingleCommentProps) => (
+  <div class="comment">
+    <span class="comment--author-name">{comment.author_name || "Anónimo"}</span>
+    <span class="comment--created-at">
+      {new Date(comment.created_at * 1000).toLocaleDateString("es")}
+    </span>
+    <span class="comment--body">{comment.body}</span>
+  </div>
+);
 
 const CommentForm = ({ serverHost }: { serverHost: string }) => (
   <form
@@ -97,7 +111,7 @@ const CommentSection = ({ comments, serverHost }: CommentSectionProps) => (
     <h2>Comentarios</h2>
     <CommentForm serverHost={serverHost} />
     <div class="comments">
-      {comments.map((comment) => <Comment comment={comment} />)}
+      {comments.map((comment) => <SingleComment comment={comment} />)}
       {!comments.length && (
         <div class="comment">
           <span class="comment--body">Aun no hay comentarios.</span>
@@ -106,6 +120,8 @@ const CommentSection = ({ comments, serverHost }: CommentSectionProps) => (
     </div>
   </div>
 );
+
+// handlers
 
 const serveComments: CommHandler = (request) => {
   const serverHost = getServerHost(request);
@@ -165,33 +181,73 @@ const handler: Deno.ServeHandler = async (request) => {
   return new Response(null, { status: STATUS_CODE.NotFound });
 };
 
+// middlewares
+
 type Middleware = (next: Deno.ServeHandler) => Deno.ServeHandler;
 
-const middleware: Middleware =
-  (next: Deno.ServeHandler) => async (request, info) => {
-    const origins = ["http://localhost:1313", "https://letrasdesevillanas.com"];
+const catchAllErrors: Middleware = (next) => async (request, connInfo) => {
+  try {
+    return await next(request, connInfo);
+  } catch (error) {
+    logger.error(`${request.method} ${request.url}`);
+    const message = error instanceof Error ? error.message : error;
+    logger.error(message);
+    const serverHost = getServerHost(request);
+    const result = (
+      <div id="comments">
+        <h2>Comentarios</h2>
+        <div class="comments-success" style="flex-direction: column">
+          <span>Ocurrió un error</span>
+          <button
+            hx-get={`${serverHost}/comments`}
+            hx-target="#comments"
+            hx-swap="outerHTML"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+    return new Response(render(result), {
+      status: STATUS_CODE.OK,
+    });
+  }
+};
 
-    if (request.method == "OPTIONS") {
-      const response = new Response(null, { status: STATUS_CODE.NoContent });
-      response.headers.append("Access-Control-Allow-Origin", "*");
-      response.headers.append("Access-Control-Allow-Methods", request.method);
-      response.headers.append(
-        "Access-Control-Allow-Headers",
-        request.headers.get("Access-Control-Request-Headers") ?? "",
-      );
-      return response;
-    }
-    const response = await next(request, info);
+const corsHeaders: Middleware = (next) => async (request, info) => {
+  const origins = ["http://localhost:1313", "https://letrasdesevillanas.com"];
+
+  if (request.method == "OPTIONS") {
+    const response = new Response(null, { status: STATUS_CODE.NoContent });
     response.headers.append("Access-Control-Allow-Origin", "*");
-    // response.headers.append("Access-Control-Allow-Origin", "https://letrasdesevillanas.com");
-    // response.headers.append("vary", "origin");
+    response.headers.append("Access-Control-Allow-Methods", request.method);
+    response.headers.append(
+      "Access-Control-Allow-Headers",
+      request.headers.get("Access-Control-Request-Headers") ?? "",
+    );
     return response;
-  };
+  }
+  const response = await next(request, info);
+  response.headers.append("Access-Control-Allow-Origin", "*");
+  // response.headers.append("Access-Control-Allow-Origin", "https://letrasdesevillanas.com");
+  // response.headers.append("vary", "origin");
+  return response;
+};
+
+const compose = (...middlewares: Middleware[]): Middleware => (next) =>
+  middlewares.reduceRight((acc, cur) => cur(acc), next);
+
+const middlewares = compose(
+  catchAllErrors,
+  corsHeaders,
+);
+
+// main
 
 if (import.meta.main) {
   const onListen: Deno.ServeOptions["onListen"] = ({ hostname, port }) =>
     logger.info(`Listening on http://${hostname}:${port}/`);
 
   const port = parseInt(Deno.env.get("PORT") || "8080", 10);
-  Deno.serve({ port, onListen }, middleware(handler));
+  Deno.serve({ port, onListen }, middlewares(handler));
 }
