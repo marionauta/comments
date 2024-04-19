@@ -1,4 +1,5 @@
 import { DB } from "sqlite/mod.ts";
+import { nanoid } from "https://deno.land/x/nanoid@v3.0.0/mod.ts";
 import { JSX } from "https://esm.sh/preact@10.20.2";
 import { render } from "https://esm.sh/preact-render-to-string@6.4.2";
 import { STATUS_CODE } from "deno/http/status.ts";
@@ -8,17 +9,36 @@ import { TelegramBot } from "telegram/mod.ts";
 const db = new DB(Deno.env.get("COMMENTS_DATABASE") ?? "comments.db");
 db.execute(`
   create table if not exists comments (
-    id integer primary key autoincrement,
+    id text primary key,
     hostname text not null,
     pathname text not null,
     created_at integer default (unixepoch()) not null,
     author_name text,
     body text not null
-  )
+  );
 `);
 
-const tgId = Deno.env.get("TELEGRAM_CHAT_ID") ?? "";
-const bot = new TelegramBot(Deno.env.get("TELEGRAM_BOT_TOKEN") ?? "");
+const tgId = Deno.env.get("TELEGRAM_CHAT_ID");
+const tgToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
+
+let tgBot: TelegramBot | undefined;
+if (typeof tgToken === "string") {
+  tgBot = new TelegramBot(tgToken);
+} else {
+  logger.warn("Missing `TELEGRAM_BOT_TOKEN`");
+}
+
+const sendTelegramMessage = (message: string) => {
+  if (!tgBot) return;
+  if (!tgId) {
+    logger.warn("Missing `TELEGRAM_CHAT_ID`");
+    return;
+  }
+  tgBot.sendMessage({
+    chat_id: tgId,
+    text: message,
+  });
+};
 
 export type CommHandler = (
   request: Request,
@@ -104,16 +124,15 @@ const postComment: CommHandler = async (request) => {
   const comment = data.get("comment");
   const author_name = data.get("author-name") ?? "";
   if (typeof comment === "string" && typeof author_name == "string") {
+    const id = nanoid();
     db.query(
-      "insert into comments (hostname, pathname, body, author_name) values (?, ?, ?, ?)",
-      [hostname, pathname, comment, author_name],
+      "insert into comments (id, hostname, pathname, body, author_name) values (?, ?, ?, ?, ?)",
+      [id, hostname, pathname, comment, author_name],
     );
-    const update = `Comment by '${author_name}': '${comment}' @ ${hostname}`;
+    const update =
+      `Comment by ${author_name}: ${comment} @ ${hostname}${pathname}`;
     logger.info(update);
-    bot.sendMessage({
-      chat_id: tgId,
-      text: update,
-    });
+    sendTelegramMessage(update);
   }
   return (
     <div
