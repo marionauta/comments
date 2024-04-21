@@ -1,20 +1,20 @@
-import { nanoid } from "https://deno.land/x/nanoid@v3.0.0/mod.ts";
 import { render } from "https://esm.sh/preact-render-to-string@6.4.2";
 import { STATUS_CODE } from "deno/http/status.ts";
 import * as logger from "deno/log/mod.ts";
 import { getHostAndPathname, getServerHost } from "@/helpers/mod.ts";
-import type { Comment, CommHandler } from "@/models/mod.ts";
-import { CommentPublished, CommentSection } from "@/components/mod.tsx";
+import type { CommHandler } from "@/models/mod.ts";
+import {
+  CommentPublished,
+  CommentSection,
+  ServerErrorResponse,
+} from "@/components/mod.tsx";
 import { sendTelegramMessage } from "@/telegram/mod.ts";
-import { db } from "@/db/mod.ts";
+import { createComment, getComments } from "@/db/mod.ts";
 
 const serveComments: CommHandler = (request) => {
   const serverHost = getServerHost(request);
   const [hostname, pathname] = getHostAndPathname(request);
-  const comments = db.queryEntries<Comment>(
-    "select author_name, created_at, body from comments where hostname = ? and pathname = ? order by created_at desc limit 10",
-    [hostname, pathname],
-  );
+  const comments = getComments(hostname, pathname);
   return CommentSection({ comments, serverHost });
 };
 
@@ -22,19 +22,17 @@ const postComment: CommHandler = async (request) => {
   const serverHost = getServerHost(request);
   const [hostname, pathname] = getHostAndPathname(request);
   const data = await request.formData();
-  const comment = data.get("comment");
+  const body = data.get("comment");
   const author_name = data.get("author-name") ?? "";
-  if (typeof comment === "string" && typeof author_name == "string") {
-    const id = nanoid();
-    db.query(
-      "insert into comments (id, hostname, pathname, body, author_name) values (?, ?, ?, ?, ?)",
-      [id, hostname, pathname, comment, author_name],
-    );
-    const update =
-      `Comment by ${author_name}: ${comment} @ ${hostname}${pathname}`;
-    logger.info(update);
-    sendTelegramMessage(update);
+  if (typeof body !== "string" || typeof author_name !== "string") {
+    logger.warn("Comment body or author name missing");
+    return ServerErrorResponse({ serverHost });
   }
+  const comment = createComment(hostname, pathname, body, author_name);
+  logger.warn(comment.id);
+  const update = `Comment by ${author_name}: ${body} @ ${hostname}${pathname}`;
+  logger.info(update);
+  sendTelegramMessage(update);
   return CommentPublished({ serverHost });
 };
 

@@ -1,5 +1,5 @@
 import { FunctionalComponent } from "preact";
-import { type Comment } from "@/models/mod.ts";
+import type { SlimComment } from "@/models/mod.ts";
 
 export const MainCommentsFrame: FunctionalComponent = (
   { children, ...rest },
@@ -17,22 +17,20 @@ type ServerErrorResponseProps = {
 export const ServerErrorResponse = (
   { serverHost }: ServerErrorResponseProps,
 ) => (
-  <MainCommentsFrame>
-    <div class="comments-success" style="flex-direction: column">
-      <span>Ocurrió un error</span>
-      <button
-        hx-get={`${serverHost}/comments`}
-        hx-target="#comments"
-        hx-swap="outerHTML"
-      >
-        Reintentar
-      </button>
-    </div>
-  </MainCommentsFrame>
+  <div class="comments-success" style="flex-direction: column">
+    <span>Ocurrió un error</span>
+    <button
+      hx-get={`${serverHost}/comments`}
+      hx-target="#comments"
+      hx-swap="outerHTML"
+    >
+      Recargar
+    </button>
+  </div>
 );
 
 type SingleCommentProps = {
-  comment: Comment;
+  comment: SlimComment;
 };
 
 export const SingleComment = ({ comment }: SingleCommentProps) => (
@@ -58,7 +56,7 @@ export const CommentForm = ({ serverHost }: { serverHost: string }) => (
 );
 
 type CommentSectionProps = {
-  comments: Comment[];
+  comments: SlimComment[];
   serverHost: string;
 };
 
