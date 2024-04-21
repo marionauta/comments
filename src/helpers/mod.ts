@@ -7,7 +7,7 @@ export const getServerHost = (request: Request): string => {
 export const getHostAndPathname = (request: Request): [string, string] => {
   const currentUrl = request.headers.get("hx-current-url");
   if (typeof currentUrl !== "string") {
-    throw new Response(null);
+    throw new Error("Missing hx-current-url header");
   }
   const parsed = new URL(currentUrl);
   return [parsed.hostname, parsed.pathname];

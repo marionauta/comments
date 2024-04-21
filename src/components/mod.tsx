@@ -1,6 +1,13 @@
 import { FunctionalComponent } from "preact";
 import type { SlimComment } from "@/models/mod.ts";
 
+export const Home = () => (
+  <div>
+    <h1>Comments</h1>
+    <span>Nothing to see here!</span>
+  </div>
+);
+
 export const MainCommentsFrame: FunctionalComponent = (
   { children, ...rest },
 ) => (
