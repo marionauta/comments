@@ -7,10 +7,11 @@
     "@/": "./src/",
     "deno/": "https://deno.land/std@0.223.0/",
     "sqlite/": "https://deno.land/x/sqlite@v3.8/",
+    "preact": "https://esm.sh/preact@10.20.2/src/index.js",
     "telegram/": "https://deno.land/x/telegram_bot_api@0.4.0/"
   },
   "tasks": {
-    "dev": "deno run -A --watch main.tsx",
-    "release": "deno compile --target x86_64-unknown-linux-gnu -A -o comments main.tsx"
+    "dev": "deno run -A --watch main.ts",
+    "release": "deno compile --target x86_64-unknown-linux-gnu -A -o comments main.ts"
   }
 }
