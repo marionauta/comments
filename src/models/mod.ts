@@ -2,7 +2,19 @@ import { JSX } from "preact";
 
 export type CommHandler = (
   request: Request,
-) => JSX.Element | Promise<JSX.Element>;
+) => CommentResponse | Promise<CommentResponse>;
+
+// there are more
+export type RewsapOption = "innerHTML" | "outerHTML";
+
+export type CommentResponseOptions = {
+  rewsap?: RewsapOption;
+};
+
+export type CommentResponse = {
+  body: JSX.Element;
+  options?: CommentResponseOptions;
+};
 
 export type FullComment = {
   id: string;

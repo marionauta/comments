@@ -7,5 +7,10 @@ export const listCommentsHandler: CommHandler = (request) => {
   const serverHost = getServerHost(request);
   const [hostname, pathname] = getHostAndPathname(request);
   const comments = getComments(hostname, pathname);
-  return CommentSection({ comments, serverHost });
+  return {
+    body: CommentSection({ comments, serverHost }),
+    options: {
+      rewsap: "outerHTML",
+    },
+  };
 };

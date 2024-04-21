@@ -11,7 +11,7 @@
     "telegram/": "https://deno.land/x/telegram_bot_api@0.4.0/"
   },
   "tasks": {
-    "dev": "deno run -A --watch main.ts",
-    "release": "deno compile --target x86_64-unknown-linux-gnu -A -o comments main.ts"
+    "dev": "deno run -A --watch src/main.ts",
+    "release": "deno compile --target x86_64-unknown-linux-gnu -A -o comments src/main.ts"
   }
 }

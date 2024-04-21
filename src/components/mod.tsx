@@ -92,7 +92,6 @@ export const CommentPublished = ({ serverHost }: CommentPublishedProps) => (
     class="comments-success"
     hx-get={`${serverHost}/comments`}
     hx-target="#comments"
-    hx-swap="outerHTML"
     hx-trigger="load delay:2s"
   >
     Comentario enviado!
