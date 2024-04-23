@@ -15,6 +15,15 @@ db.execute(`
   );
 `);
 
+db.execute(`
+  create index if not exists idx_comments_get
+  on comments (
+    hostname,
+    pathname,
+    created_at desc
+  );
+`);
+
 export const getComments = (hostname: string, pathname: string) => {
   const comments = db.queryEntries<SlimComment>(
     "select author_name, created_at, body from comments where hostname = ? and pathname = ? order by created_at desc limit 10",
@@ -29,14 +38,19 @@ export const createComment = (
   body: string,
   author_name: string,
 ): FullComment => {
-  const id = nanoid();
-  db.query(
-    "insert into comments (id, hostname, pathname, body, author_name) values (?, ?, ?, ?, ?)",
-    [id, hostname, pathname, body, author_name],
-  );
-  const results = db.queryEntries<FullComment>(
-    "select * from comments where id = ?",
-    [id],
-  );
-  return results[0];
+  return db.transaction<FullComment>(() => {
+    const id = nanoid();
+    db.query(
+      "insert into comments (id, hostname, pathname, body, author_name) values (?, ?, ?, ?, ?)",
+      [id, hostname, pathname, body, author_name],
+    );
+    const results = db.queryEntries<FullComment>(
+      "select * from comments where id = ?",
+      [id],
+    );
+    if (results.length < 1) {
+      throw new Error("Comment creation failed somehow");
+    }
+    return results[0];
+  });
 };

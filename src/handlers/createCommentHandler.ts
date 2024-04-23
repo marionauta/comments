@@ -1,11 +1,13 @@
 import * as logger from "deno/log/mod.ts";
 import { getHostAndPathname, getServerHost } from "@/helpers/mod.ts";
-import type { CommHandler, CommentResponse } from "@/models/mod.ts";
+import type { CommentResponse, CommHandler } from "@/models/mod.ts";
 import { CommentPublished, ServerErrorResponse } from "@/components/mod.tsx";
 import { sendTelegramMessage } from "@/telegram/mod.ts";
 import { createComment } from "@/db/mod.ts";
 
-export const createCommentHandler: CommHandler = async (request): Promise<CommentResponse> => {
+export const createCommentHandler: CommHandler = async (
+  request,
+): Promise<CommentResponse> => {
   const serverHost = getServerHost(request);
   const [hostname, pathname] = getHostAndPathname(request);
   const data = await request.formData();
