@@ -6,6 +6,7 @@
   "imports": {
     "@/": "./src/",
     "deno/": "https://deno.land/std@0.223.0/",
+    "deno-htmx/": "https://raw.githubusercontent.com/marionauta/deno-htmx/812a7eaa76daf947f0cfeb5934f6b354214eec1a/src/preact/",
     "sqlite/": "https://deno.land/x/sqlite@v3.8/",
     "preact": "https://esm.sh/preact@10.20.2/src/index.js",
     "telegram/": "https://deno.land/x/telegram_bot_api@0.4.0/"

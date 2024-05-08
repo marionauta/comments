@@ -92,6 +92,14 @@
     "https://esm.sh/stable/preact@10.20.2/denonext/jsx-runtime.js": "2a5b981955e92e3ff86906ac0e5955ec0e6e5ca71032f3f063912cb85ae9a7f1",
     "https://esm.sh/stable/preact@10.20.2/denonext/preact.mjs": "f418bc70c24b785703afb9d4dea8cdc1e315e43c8df620a0c52fd27ad9bd70eb",
     "https://esm.sh/stable/preact@10.20.2/denonext/src.js": "2354ba46ce869a51b316019278ab69d429f28a8a909c117b217569a2692684cc",
-    "https://esm.sh/v135/preact-render-to-string@6.4.2/denonext/preact-render-to-string.mjs": "912b3613479fb420eda357ac21d3cf970753cb8f486563f9df5c222bf1ced149"
+    "https://esm.sh/v135/preact-render-to-string@6.4.2/denonext/preact-render-to-string.mjs": "912b3613479fb420eda357ac21d3cf970753cb8f486563f9df5c222bf1ced149",
+    "https://raw.githubusercontent.com/marionauta/deno-htmx/812a7eaa76daf947f0cfeb5934f6b354214eec1a/src/functions.ts": "1f49fa25209733d2c36395fa18e03d82be1ad4cf85cfa0e2f37ebef3a6c97498",
+    "https://raw.githubusercontent.com/marionauta/deno-htmx/812a7eaa76daf947f0cfeb5934f6b354214eec1a/src/preact/functions.ts": "0fe354394bd32bd4ce245fc1ee2f9e14f5a1b134ed447bc5b8fe6bcc42f3066a",
+    "https://raw.githubusercontent.com/marionauta/deno-htmx/812a7eaa76daf947f0cfeb5934f6b354214eec1a/src/preact/mod.ts": "cf1defd79b2dca0b5deeec44c16e2e64f62bb72048515fc4445e54c1eaf487aa",
+    "https://raw.githubusercontent.com/marionauta/deno-htmx/812a7eaa76daf947f0cfeb5934f6b354214eec1a/src/preact/types.ts": "343a010f37ccde5624c17770e881215043f1bb6b52523f50df31e9b5ab60f92e",
+    "https://raw.githubusercontent.com/marionauta/deno-htmx/812a7eaa76daf947f0cfeb5934f6b354214eec1a/src/types.ts": "3cfdd145003067db1cdfbec2320c206f8569ce50d99d625c1975577307dcc690",
+    "https://raw.githubusercontent.com/marionauta/deno-htmx/d2a84e81445054d04a929b343a411150f5e074c3/src/functions.ts": "97d6a40145d27183ce6066c9a8835f60d447dbf5648b65373f198b6a96cdaac6",
+    "https://raw.githubusercontent.com/marionauta/deno-htmx/d2a84e81445054d04a929b343a411150f5e074c3/src/mod.ts": "cf1defd79b2dca0b5deeec44c16e2e64f62bb72048515fc4445e54c1eaf487aa",
+    "https://raw.githubusercontent.com/marionauta/deno-htmx/d2a84e81445054d04a929b343a411150f5e074c3/src/types.ts": "3cfdd145003067db1cdfbec2320c206f8569ce50d99d625c1975577307dcc690"
   }
 }

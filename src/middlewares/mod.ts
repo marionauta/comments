@@ -1,8 +1,8 @@
 import * as logger from "deno/log/mod.ts";
 import { getServerHost } from "@/helpers/mod.ts";
 import { STATUS_CODE } from "deno/http/status.ts";
-import { render } from "https://esm.sh/preact-render-to-string@6.4.2";
 import { ServerErrorResponse } from "@/components/mod.tsx";
+import { htmxResponseToStandard } from "deno-htmx/functions.ts";
 
 export type Middleware = (next: Deno.ServeHandler) => Deno.ServeHandler;
 
@@ -15,8 +15,8 @@ const catchAllErrors: Middleware = (next) => async (request, connInfo) => {
     logger.error(message);
     const serverHost = getServerHost(request);
     const result = ServerErrorResponse({ serverHost });
-    return new Response(render(result), {
-      status: STATUS_CODE.OK,
+    return htmxResponseToStandard({
+      body: result,
     });
   }
 };
