@@ -3,7 +3,7 @@ export type FullComment = {
   hostname: string;
   pathname: string;
   body: string;
-  author_name?: string;
+  author_name: string | null;
   created_at: number;
 };
 

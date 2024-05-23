@@ -4,6 +4,8 @@ import type { FullComment, SlimComment } from "@/models/mod.ts";
 
 const db = new DB(Deno.env.get("COMMENTS_DATABASE") ?? "comments.db");
 
+type CommentRow = [string, string, string, number, string | null, string];
+
 db.execute(`
   create table if not exists comments (
     id text primary key,
@@ -32,25 +34,35 @@ export const getComments = (hostname: string, pathname: string) => {
   return comments;
 };
 
+type CreateCommentQueryParams = Omit<FullComment, "created_at">;
+const createCommentQuery = db.prepareQuery<
+  CommentRow,
+  FullComment,
+  CreateCommentQueryParams
+>(`
+  insert into comments
+    (id, hostname, pathname, body, author_name)
+    values
+    (:id, :hostname, :pathname, :body, :author_name)
+    returning *
+`);
+
 export const createComment = (
   hostname: string,
   pathname: string,
   body: string,
-  author_name: string,
+  author_name: string | null,
 ): FullComment => {
-  return db.transaction<FullComment>(() => {
-    const id = nanoid();
-    db.query(
-      "insert into comments (id, hostname, pathname, body, author_name) values (?, ?, ?, ?, ?)",
-      [id, hostname, pathname, body, author_name],
-    );
-    const results = db.queryEntries<FullComment>(
-      "select * from comments where id = ?",
-      [id],
-    );
-    if (results.length < 1) {
-      throw new Error("Comment creation failed somehow");
-    }
-    return results[0];
+  const id = nanoid();
+  const comment = createCommentQuery.firstEntry({
+    id,
+    hostname,
+    pathname,
+    body,
+    author_name,
   });
+  if (!comment) {
+    throw new Error("Comment creation failed somehow");
+  }
+  return comment;
 };
