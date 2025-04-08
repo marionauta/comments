@@ -24,7 +24,7 @@ type ServerErrorResponseProps = {
 export const ServerErrorResponse = (
   { serverHost }: ServerErrorResponseProps,
 ) => (
-  <div class="comments-success" style="flex-direction: column">
+  <div class="comments-failure" style="flex-direction: column">
     <span>Ocurrió un error</span>
     <button
       hx-get={`${serverHost}/comments`}
@@ -50,7 +50,12 @@ export const SingleComment = ({ comment }: SingleCommentProps) => (
   </div>
 );
 
-export const CommentForm = ({ serverHost, authorName }: { serverHost: string, authorName: string | undefined }) => (
+type CommentFormProps = {
+  serverHost: string,
+  authorName: string | undefined,
+};
+
+export const CommentForm = ({ serverHost, authorName }: CommentFormProps) => (
   <form
     class="comments-form"
     hx-post={`${serverHost}/comments`}
@@ -100,6 +105,7 @@ export const CommentPublished = ({ serverHost, authorName }: CommentPublishedPro
       class="comments-success"
       hx-get={url}
       hx-target="#comments"
+      hx-swap="outerHTML"
       hx-trigger="load delay:2s"
     >
       Comentario enviado!

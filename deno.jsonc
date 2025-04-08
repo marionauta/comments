@@ -7,7 +7,7 @@
     "@/": "./src/",
     "deno/": "https://deno.land/std@0.223.0/",
     "deno-htmx/": "https://raw.githubusercontent.com/marionauta/deno-htmx/16978ef15d49415716185035c25fc9e69a387932/src/preact/",
-    "sqlite/": "https://deno.land/x/sqlite@v3.8/",
+    "sqlite/": "https://deno.land/x/sqlite@v3.9.1/",
     "preact": "https://esm.sh/preact@10.20.2/src/index.js",
     "telegram/": "https://deno.land/x/telegram_bot_api@0.4.0/"
   },
