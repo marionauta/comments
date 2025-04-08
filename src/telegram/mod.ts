@@ -1,21 +1,19 @@
-import TelegramBot from "node-telegram-bot-api";
 import logger from "@/logger.ts";
+import { create, sendMessage, type TelegramClient } from "./lib";
 
-const tgId = import.meta.env["TELEGRAM_CHAT_ID"];
-const tgToken = import.meta.env["TELEGRAM_BOT_TOKEN"];
+const chatId = import.meta.env["TELEGRAM_CHAT_ID"];
+const token = import.meta.env["TELEGRAM_BOT_TOKEN"];
 
-let tgBot: TelegramBot | undefined;
-if (typeof tgToken === "string") {
-  tgBot = new TelegramBot(tgToken);
-} else {
+const client: TelegramClient | null = token ? create(token) : null;
+if (!client) {
   logger.warn("Missing `TELEGRAM_BOT_TOKEN`");
 }
 
-export const sendTelegramMessage = (message: string) => {
-  if (!tgBot) return;
-  if (!tgId) {
+export async function sendTelegramMessage(message: string) {
+  if (!client) return;
+  if (!chatId || chatId.length === 0) {
     logger.warn("Missing `TELEGRAM_CHAT_ID`");
     return;
   }
-  tgBot.sendMessage(tgId, message);
-};
+  await sendMessage(client, chatId, message);
+}
