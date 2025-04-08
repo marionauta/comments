@@ -1,14 +1,13 @@
-import * as logger from "deno/log/mod.ts";
+import logger from "@/logger.ts";
 import { getServerHost } from "@/helpers/mod.ts";
-import { STATUS_CODE } from "deno/http/status.ts";
 import { ServerErrorResponse } from "@/components/mod.tsx";
-import type { HtmxResponse, HtmxServeHandler } from "deno-htmx/mod.ts";
+import type { HtmxResponse, HtmxServeHandler } from "@/htmx/preact/types.ts";
 
 export type Middleware = (next: HtmxServeHandler) => HtmxServeHandler;
 
-const catchAllErrors: Middleware = (next) => async (request, connInfo) => {
+const catchAllErrors: Middleware = (next) => async (request) => {
   try {
-    return await next(request, connInfo);
+    return await next(request);
   } catch (error) {
     logger.error(`${request.method} ${request.url}`);
     const message = error instanceof Error ? error.message : error;
@@ -21,12 +20,13 @@ const catchAllErrors: Middleware = (next) => async (request, connInfo) => {
 };
 
 const corsHeaders: Middleware =
-  (next) => async (request, info): Promise<HtmxResponse> => {
+  (next) =>
+  async (request): Promise<HtmxResponse> => {
     if (request.method == "OPTIONS") {
       return {
         body: null,
         init: {
-          status: STATUS_CODE.NoContent,
+          status: 204,
           headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": request.method,
@@ -36,7 +36,7 @@ const corsHeaders: Middleware =
         },
       };
     }
-    const response = await next(request, info);
+    const response = await next(request);
     return {
       ...response,
       init: {
@@ -49,12 +49,11 @@ const corsHeaders: Middleware =
     };
   };
 
-const compose = (...middlewares: Middleware[]): Middleware => (next) =>
-  middlewares.reduceRight((acc, cur) => cur(acc), next);
+const compose =
+  (...middlewares: Middleware[]): Middleware =>
+  (next) =>
+    middlewares.reduceRight((acc, cur) => cur(acc), next);
 
-const middlewares = compose(
-  catchAllErrors,
-  corsHeaders,
-);
+const middlewares = compose(catchAllErrors, corsHeaders);
 
 export default middlewares;

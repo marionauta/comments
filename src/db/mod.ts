@@ -1,12 +1,12 @@
-import { nanoid } from "https://deno.land/x/nanoid@v3.0.0/mod.ts";
-import { DB } from "sqlite/mod.ts";
+import { nanoid } from "nanoid";
+import { Database } from "bun:sqlite";
 import type { FullComment, SlimComment } from "@/models/mod.ts";
 
-const db = new DB(Deno.env.get("COMMENTS_DATABASE") ?? "comments.db");
+const db = new Database(import.meta.env["COMMENTS_DATABASE"] ?? "comments.db", {
+  strict: true,
+});
 
-type CommentRow = [string, string, string, number, string | null, string];
-
-db.execute(`
+db.exec(`
   create table if not exists comments (
     id text primary key,
     hostname text not null,
@@ -17,7 +17,7 @@ db.execute(`
   );
 `);
 
-db.execute(`
+db.exec(`
   create index if not exists idx_comments_get
   on comments (
     hostname,
@@ -26,40 +26,45 @@ db.execute(`
   );
 `);
 
-export const getComments = (hostname: string, pathname: string) => {
-  const comments = db.queryEntries<SlimComment>(
-    "select author_name, created_at, body from comments where hostname = ? and pathname = ? order by created_at desc limit 10",
-    [hostname, pathname],
-  );
+type GetCommentsParams = {
+  hostname: string;
+  pathname: string;
+};
+
+const getCommentsQuery = db.query<SlimComment, GetCommentsParams>(`
+  select
+    author_name, created_at, body
+  from
+    comments
+  where
+    hostname = :hostname and pathname = :pathname
+  order by
+    created_at desc
+  limit
+    10;"
+`);
+
+export const getComments = (params: GetCommentsParams) => {
+  const comments = getCommentsQuery.all(params);
   return comments;
 };
 
-type CreateCommentQueryParams = Omit<FullComment, "created_at">;
-const createCommentQuery = db.prepareQuery<
-  CommentRow,
-  FullComment,
-  CreateCommentQueryParams
->(`
-  insert into comments
-    (id, hostname, pathname, body, author_name)
-    values
+type CreateCommentParams = Omit<FullComment, "created_at">;
+const createCommentQuery = db.query<FullComment, CreateCommentParams>(`
+  insert into
+    comments (id, hostname, pathname, body, author_name)
+  values
     (:id, :hostname, :pathname, :body, :author_name)
-    returning *
+  returning *;
 `);
 
 export const createComment = (
-  hostname: string,
-  pathname: string,
-  body: string,
-  author_name: string | null,
+  params: Omit<CreateCommentParams, "id">,
 ): FullComment => {
   const id = nanoid();
-  const comment = createCommentQuery.firstEntry({
+  const comment = createCommentQuery.get({
+    ...params,
     id,
-    hostname,
-    pathname,
-    body,
-    author_name,
   });
   if (!comment) {
     throw new Error("Comment creation failed somehow");

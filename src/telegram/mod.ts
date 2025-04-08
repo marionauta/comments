@@ -1,8 +1,8 @@
-import { TelegramBot } from "telegram/mod.ts";
-import * as logger from "deno/log/mod.ts";
+import TelegramBot from "node-telegram-bot-api";
+import logger from "@/logger.ts";
 
-const tgId = Deno.env.get("TELEGRAM_CHAT_ID");
-const tgToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
+const tgId = import.meta.env["TELEGRAM_CHAT_ID"];
+const tgToken = import.meta.env["TELEGRAM_BOT_TOKEN"];
 
 let tgBot: TelegramBot | undefined;
 if (typeof tgToken === "string") {
@@ -17,8 +17,5 @@ export const sendTelegramMessage = (message: string) => {
     logger.warn("Missing `TELEGRAM_CHAT_ID`");
     return;
   }
-  tgBot.sendMessage({
-    chat_id: tgId,
-    text: message,
-  });
+  tgBot.sendMessage(tgId, message);
 };

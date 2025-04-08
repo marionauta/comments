@@ -1,6 +1,6 @@
-import * as logger from "deno/log/mod.ts";
+import logger from "@/logger.ts";
 import { getHostAndPathname, getServerHost } from "@/helpers/mod.ts";
-import type { HtmxServeHandler } from "deno-htmx/mod.ts";
+import type { HtmxServeHandler } from "@/htmx/preact/index.ts";
 import { CommentPublished, ServerErrorResponse } from "@/components/mod.tsx";
 import { sendTelegramMessage } from "@/telegram/mod.ts";
 import { createComment } from "@/db/mod.ts";
@@ -14,7 +14,7 @@ export const createCommentHandler: HtmxServeHandler = async (request) => {
     logger.warn("Comment body must be a string");
     return {
       body: ServerErrorResponse({ serverHost }),
-    }
+    };
   }
   const authorName = data.get("author-name");
   if (authorName && typeof authorName !== "string") {
@@ -23,9 +23,13 @@ export const createCommentHandler: HtmxServeHandler = async (request) => {
       body: ServerErrorResponse({ serverHost }),
     };
   }
-  const comment = createComment(hostname, pathname, body, authorName);
-  const update =
-    `Comment by ${comment.author_name}: ${comment.body} @ ${hostname}${pathname}`;
+  const comment = createComment({
+    hostname,
+    pathname,
+    body,
+    author_name: authorName,
+  });
+  const update = `Comment by ${comment.author_name}: ${comment.body} @ ${hostname}${pathname}`;
   logger.info(update);
   sendTelegramMessage(update);
   return {

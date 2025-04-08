@@ -1,15 +1,28 @@
-import * as logger from "deno/log/mod.ts";
-import handlers from "@/handlers/mod.ts";
+import logger from "@/logger.ts";
+import { listCommentsHandler } from "@/handlers/listCommentsHandler.ts";
+import { createCommentHandler } from "@/handlers/createCommentHandler.ts";
+import { emptyHandler } from "@/handlers/emptyHandler.ts";
+import { htmxServe, type HtmxServeHandler } from "@/htmx/preact/index.ts";
 import middlewares from "@/middlewares/mod.ts";
-import { htmxServe } from "deno-htmx/mod.ts";
+import type { RouterTypes } from "bun";
 
-if (import.meta.main) {
-  const onListen = (addr: Deno.NetAddr) => {
-    if (!("port" in addr)) return;
-    const { hostname, port } = addr;
-    logger.info(`Listening on http://${hostname}:${port}/`);
+const server = Bun.serve({
+  routes: {
+    "/": new Response("Comments - Nothing to see here!"),
+    "/comments": {
+      OPTIONS: serve(emptyHandler),
+      GET: serve(listCommentsHandler),
+      POST: serve(createCommentHandler),
+    },
+  },
+});
+
+function serve<T extends string>(
+  handler: HtmxServeHandler,
+): RouterTypes.RouteHandler<T> {
+  return function (request, server) {
+    return htmxServe(middlewares(handler))(request, server);
   };
-  const port = parseInt(Deno.env.get("PORT") || "8080", 10);
-  // @ts-ignore middlewares
-  Deno.serve({ port, onListen }, htmxServe(middlewares(handlers)));
 }
+
+logger.info(`Listening on http://${server.hostname}:${server.port}`);
