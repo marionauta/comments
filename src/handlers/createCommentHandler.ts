@@ -10,19 +10,25 @@ export const createCommentHandler: HtmxServeHandler = async (request) => {
   const [hostname, pathname] = getHostAndPathname(request);
   const data = await request.formData();
   const body = data.get("comment");
-  const author_name = data.get("author-name") ?? "";
-  if (typeof body !== "string" || typeof author_name !== "string") {
-    logger.warn("Comment body or author name must be strings");
+  if (typeof body !== "string") {
+    logger.warn("Comment body must be a string");
+    return {
+      body: ServerErrorResponse({ serverHost }),
+    }
+  }
+  const authorName = data.get("author-name");
+  if (authorName && typeof authorName !== "string") {
+    logger.warn("Comment author name must be a string");
     return {
       body: ServerErrorResponse({ serverHost }),
     };
   }
-  const comment = createComment(hostname, pathname, body, author_name);
+  const comment = createComment(hostname, pathname, body, authorName);
   const update =
     `Comment by ${comment.author_name}: ${comment.body} @ ${hostname}${pathname}`;
   logger.info(update);
   sendTelegramMessage(update);
   return {
-    body: CommentPublished({ serverHost }),
+    body: CommentPublished({ serverHost, authorName }),
   };
 };

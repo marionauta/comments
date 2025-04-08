@@ -50,14 +50,14 @@ export const SingleComment = ({ comment }: SingleCommentProps) => (
   </div>
 );
 
-export const CommentForm = ({ serverHost }: { serverHost: string }) => (
+export const CommentForm = ({ serverHost, authorName }: { serverHost: string, authorName: string | undefined }) => (
   <form
     class="comments-form"
     hx-post={`${serverHost}/comments`}
     hx-swap="outerHTML"
   >
     <textarea name="comment" placeholder="Comentario..." required />
-    <input type="text" placeholder="Nombre, opcional" name="author-name" />
+    <input type="text" placeholder="Nombre (opcional)" name="author-name" value={authorName} />
     <button type="submit">Enviar</button>
   </form>
 );
@@ -65,13 +65,14 @@ export const CommentForm = ({ serverHost }: { serverHost: string }) => (
 type CommentSectionProps = {
   comments: SlimComment[];
   serverHost: string;
+  authorName: string | undefined;
 };
 
 export const CommentSection = (
-  { comments, serverHost }: CommentSectionProps,
+  { comments, serverHost, authorName }: CommentSectionProps,
 ) => (
   <MainCommentsFrame>
-    <CommentForm serverHost={serverHost} />
+    <CommentForm serverHost={serverHost} authorName={authorName} />
     <div class="comments">
       {comments.map((comment) => <SingleComment comment={comment} />)}
       {!comments.length && (
@@ -85,15 +86,23 @@ export const CommentSection = (
 
 type CommentPublishedProps = {
   serverHost: string;
+  authorName: string | null | undefined;
 };
 
-export const CommentPublished = ({ serverHost }: CommentPublishedProps) => (
-  <div
-    class="comments-success"
-    hx-get={`${serverHost}/comments`}
-    hx-target="#comments"
-    hx-trigger="load delay:2s"
-  >
-    Comentario enviado!
-  </div>
-);
+export const CommentPublished = ({ serverHost, authorName }: CommentPublishedProps) => {
+  const url = new URL(serverHost);
+  url.pathname = "/comments"
+  if (authorName) {
+    url.searchParams.append("author_name", authorName);
+  }
+  return (
+    <div
+      class="comments-success"
+      hx-get={url}
+      hx-target="#comments"
+      hx-trigger="load delay:2s"
+    >
+      Comentario enviado!
+    </div>
+  )
+}
