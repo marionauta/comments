@@ -29,9 +29,9 @@ const corsHeaders: Middleware =
           status: 204,
           headers: {
             "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": request.method,
-            "Access-Control-Allow-Headers":
-              request.headers.get("Access-Control-Request-Headers") ?? "",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Expose-Headers": "*",
           },
         },
       };
@@ -44,6 +44,7 @@ const corsHeaders: Middleware =
         headers: {
           ...response.init?.headers,
           "Access-Control-Allow-Origin": "*",
+          "Access-Control-Expose-Headers": "*",
         },
       },
     };

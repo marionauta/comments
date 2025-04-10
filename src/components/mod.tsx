@@ -1,16 +1,10 @@
-import { FunctionalComponent } from "preact";
+import type { FunctionalComponent } from "preact";
 import type { SlimComment } from "@/models/mod.ts";
 
-export const Home = () => (
-  <div>
-    <h1>Comments</h1>
-    <span>Nothing to see here!</span>
-  </div>
-);
-
-export const MainCommentsFrame: FunctionalComponent = (
-  { children, ...rest },
-) => (
+export const MainCommentsFrame: FunctionalComponent = ({
+  children,
+  ...rest
+}) => (
   <div id="comments" {...rest}>
     <h2>Comentarios</h2>
     {children}
@@ -21,10 +15,10 @@ type ServerErrorResponseProps = {
   serverHost: string;
 };
 
-export const ServerErrorResponse = (
-  { serverHost }: ServerErrorResponseProps,
-) => (
-  <div class="comments-failure" style="flex-direction: column">
+export const ServerErrorResponse = ({
+  serverHost,
+}: ServerErrorResponseProps) => (
+  <div class="comments-failure">
     <span>Ocurrió un error</span>
     <button
       hx-get={`${serverHost}/comments`}
@@ -51,8 +45,8 @@ export const SingleComment = ({ comment }: SingleCommentProps) => (
 );
 
 type CommentFormProps = {
-  serverHost: string,
-  authorName: string | undefined,
+  serverHost: string;
+  authorName: string | undefined;
 };
 
 export const CommentForm = ({ serverHost, authorName }: CommentFormProps) => (
@@ -62,7 +56,12 @@ export const CommentForm = ({ serverHost, authorName }: CommentFormProps) => (
     hx-swap="outerHTML"
   >
     <textarea name="comment" placeholder="Comentario..." required />
-    <input type="text" placeholder="Nombre (opcional)" name="author-name" value={authorName} />
+    <input
+      type="text"
+      placeholder="Nombre (opcional)"
+      name="author-name"
+      value={authorName}
+    />
     <button type="submit">Enviar</button>
   </form>
 );
@@ -73,13 +72,17 @@ type CommentSectionProps = {
   authorName: string | undefined;
 };
 
-export const CommentSection = (
-  { comments, serverHost, authorName }: CommentSectionProps,
-) => (
+export const CommentSection = ({
+  comments,
+  serverHost,
+  authorName,
+}: CommentSectionProps) => (
   <MainCommentsFrame>
     <CommentForm serverHost={serverHost} authorName={authorName} />
     <div class="comments">
-      {comments.map((comment) => <SingleComment comment={comment} />)}
+      {comments.map((comment) => (
+        <SingleComment comment={comment} />
+      ))}
       {!comments.length && (
         <div class="comment">
           <span class="comment--body">Aun no hay comentarios.</span>
@@ -94,9 +97,12 @@ type CommentPublishedProps = {
   authorName: string | null | undefined;
 };
 
-export const CommentPublished = ({ serverHost, authorName }: CommentPublishedProps) => {
+export const CommentPublished = ({
+  serverHost,
+  authorName,
+}: CommentPublishedProps) => {
   const url = new URL(serverHost);
-  url.pathname = "/comments"
+  url.pathname = "/comments";
   if (authorName) {
     url.searchParams.append("author_name", authorName);
   }
@@ -110,5 +116,5 @@ export const CommentPublished = ({ serverHost, authorName }: CommentPublishedPro
     >
       Comentario enviado!
     </div>
-  )
-}
+  );
+};
