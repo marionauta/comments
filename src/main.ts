@@ -25,4 +25,4 @@ function serve<T extends string>(
   };
 }
 
-logger.info(`Listening on http://${server.hostname}:${server.port}`);
+logger.info(`Listening on ${server.url}`);

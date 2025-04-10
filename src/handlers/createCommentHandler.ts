@@ -5,8 +5,11 @@ import { CommentPublished, ServerErrorResponse } from "@/components/mod.tsx";
 import { sendTelegramMessage } from "@/telegram/mod.ts";
 import { createComment } from "@/db/mod.ts";
 
-export const createCommentHandler: HtmxServeHandler = async (request) => {
-  const serverHost = getServerHost(request);
+export const createCommentHandler: HtmxServeHandler = async (
+  request,
+  server,
+) => {
+  const serverHost = getServerHost(request, server);
   const [hostname, pathname] = getHostAndPathname(request);
   const data = await request.formData();
   const body = data.get("comment");
@@ -22,6 +25,15 @@ export const createCommentHandler: HtmxServeHandler = async (request) => {
     return {
       body: ServerErrorResponse({ serverHost }),
     };
+  }
+  if (authorName !== null) {
+    request.cookies.set({
+      name: "author_name",
+      value: authorName,
+      secure: true,
+      httpOnly: true,
+      sameSite: "none",
+    });
   }
   const comment = createComment({
     hostname,

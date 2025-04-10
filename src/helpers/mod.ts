@@ -1,6 +1,8 @@
-export const getServerHost = (request: Request): string => {
+import type { BunRequest, Server } from "bun";
+
+export const getServerHost = (request: BunRequest, server: Server): string => {
   const https = request.headers.get("origin")?.includes("https") ?? true;
-  const base = request.headers.get("host") ?? "comments.nachbaur.dev";
+  const base = request.headers.get("host") ?? server.hostname;
   return `${https ? "https" : "http"}://${base}`;
 };
 

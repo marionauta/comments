@@ -1,3 +1,5 @@
+import type { BunRequest, Server } from "bun";
+
 export type ReswapOption =
   | "innerHTML"
   | "outerHTML"
@@ -20,5 +22,6 @@ export type HtmxResponse<Body> = {
 };
 
 export type HtmxServeHandler<Body> = (
-  request: Request,
+  request: BunRequest,
+  server: Server,
 ) => HtmxResponse<Body> | Promise<HtmxResponse<Body>>;
