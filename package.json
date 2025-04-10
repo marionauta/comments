@@ -1,8 +1,13 @@
 {
-  "name": "bun",
-  "module": "index.ts",
+  "name": "comments",
+  "module": "src/main.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "compile": "bun build --compile --outfile=comments --target=bun-linux-modern src/main.ts",
+    "deploy": "bash deploy.sh marioserver /var/www comments",
+    "start": "PORT=8080 bun run --watch src/main.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
