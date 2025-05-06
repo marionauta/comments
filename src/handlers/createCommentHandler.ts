@@ -3,7 +3,7 @@ import { getHostAndPathname, getServerHost } from "@/helpers/mod.ts";
 import type { HtmxServeHandler } from "@/htmx/preact/index.ts";
 import { CommentPublished, ServerErrorResponse } from "@/components/mod.tsx";
 import { sendTelegramMessage } from "@/telegram/mod.ts";
-import { createComment } from "@/db/mod.ts";
+import { createComment, isDomainAllowed } from "@/db/mod.ts";
 
 export const createCommentHandler: HtmxServeHandler = async (
   request,
@@ -11,6 +11,12 @@ export const createCommentHandler: HtmxServeHandler = async (
 ) => {
   const serverHost = getServerHost(request, server);
   const [hostname, pathname] = getHostAndPathname(request);
+  if (!isDomainAllowed({ hostname })) {
+    logger.warn(`Hostname '${hostname}' not allowed.`);
+    return {
+      body: ServerErrorResponse({ serverHost }),
+    };
+  }
   const data = await request.formData();
   const body = data.get("comment");
   if (typeof body !== "string") {
@@ -46,5 +52,8 @@ export const createCommentHandler: HtmxServeHandler = async (
   sendTelegramMessage(update);
   return {
     body: CommentPublished({ serverHost, authorName }),
+    init: {
+      status: 201,
+    },
   };
 };

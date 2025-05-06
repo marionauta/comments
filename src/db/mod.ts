@@ -7,6 +7,12 @@ const db = new Database(import.meta.env["COMMENTS_DATABASE"] ?? "comments.db", {
 });
 
 db.exec(`
+  create table if not exists domains (
+    hostname text not null primary key
+  ) strict, without rowid;
+`);
+
+db.exec(`
   create table if not exists comments (
     id text primary key,
     hostname text not null,
@@ -25,6 +31,18 @@ db.exec(`
     created_at desc
   );
 `);
+
+type IsDomainAllowedParams = {
+  hostname: string;
+};
+
+const isDomainAllowedQuery = db.query<{ e: boolean }, IsDomainAllowedParams>(`
+  select exists (select 1 count from domains where hostname = :hostname) as e;
+`);
+
+export function isDomainAllowed(params: IsDomainAllowedParams): boolean {
+  return isDomainAllowedQuery.get(params)?.e ?? false;
+}
 
 type GetCommentsParams = {
   hostname: string;
