@@ -1,5 +1,5 @@
 import type { FunctionalComponent } from "preact";
-import type { SlimComment } from "@/models/mod.ts";
+import type { Comment } from "@/models/mod.ts";
 
 export const MainCommentsFrame: FunctionalComponent = ({
   children,
@@ -31,15 +31,15 @@ export const ServerErrorResponse = ({
 );
 
 type SingleCommentProps = {
-  comment: SlimComment;
+  comment: Comment;
 };
 
 export const SingleComment = ({ comment }: SingleCommentProps) => (
   <div class="comment">
     <span class="comment--author-name">{comment.author_name || "Anónimo"}</span>
-    <span class="comment--created-at">
+    <a class="comment--created-at" href={`${comment.pathname}#comments`}>
       {new Date(comment.created_at * 1000).toLocaleDateString("es")}
-    </span>
+    </a>
     <span class="comment--body">{comment.body}</span>
   </div>
 );
@@ -67,7 +67,7 @@ export const CommentForm = ({ serverHost, authorName }: CommentFormProps) => (
 );
 
 type CommentSectionProps = {
-  comments: SlimComment[];
+  comments: Comment[];
   serverHost: string;
   authorName: string | undefined;
 };
@@ -81,7 +81,7 @@ export const CommentSection = ({
     <CommentForm serverHost={serverHost} authorName={authorName} />
     <div class="comments">
       {comments.map((comment) => (
-        <SingleComment comment={comment} />
+        <SingleComment key={comment.id} comment={comment} />
       ))}
       {!comments.length && (
         <div class="comment">
@@ -91,6 +91,21 @@ export const CommentSection = ({
     </div>
   </MainCommentsFrame>
 );
+
+type HostCommentSectionProps = {
+  comments: Comment[];
+};
+
+export function HostCommentSection({ comments }: HostCommentSectionProps) {
+  return comments.length > 0 ? (
+    <div id="comments">
+      <h2>Últimos comentarios</h2>
+      {comments.map((comment) => (
+        <SingleComment key={comment.id} comment={comment} />
+      ))}
+    </div>
+  ) : null;
+}
 
 type CommentPublishedProps = {
   serverHost: string;

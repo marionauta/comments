@@ -1,5 +1,6 @@
 import logger from "@/logger.ts";
 import { listCommentsHandler } from "@/handlers/listCommentsHandler.ts";
+import { listHostCommentsHandler } from "./handlers/listHostCommentsHandler.ts";
 import { createCommentHandler } from "@/handlers/createCommentHandler.ts";
 import { emptyHandler } from "@/handlers/emptyHandler.ts";
 import { htmxServe, type HtmxServeHandler } from "@/htmx/preact/index.ts";
@@ -14,6 +15,7 @@ const server = Bun.serve({
       GET: serve(listCommentsHandler),
       POST: serve(createCommentHandler),
     },
+    "/comments/host": serve(listHostCommentsHandler),
   },
 });
 

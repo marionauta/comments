@@ -1,4 +1,4 @@
-export type FullComment = {
+export type Comment = {
   id: string;
   hostname: string;
   pathname: string;
@@ -6,8 +6,3 @@ export type FullComment = {
   author_name: string | null;
   created_at: number;
 };
-
-export type SlimComment = Pick<
-  FullComment,
-  "author_name" | "created_at" | "body"
->;

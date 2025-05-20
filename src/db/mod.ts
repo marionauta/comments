@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { Database } from "bun:sqlite";
-import type { FullComment, SlimComment } from "@/models/mod.ts";
+import type { Comment } from "@/models/mod.ts";
 
 const db = new Database(import.meta.env["COMMENTS_DATABASE"] ?? "comments.db", {
   strict: true,
@@ -49,9 +49,9 @@ type GetCommentsParams = {
   pathname: string;
 };
 
-const getCommentsQuery = db.query<SlimComment, GetCommentsParams>(`
+const getCommentsQuery = db.query<Comment, GetCommentsParams>(`
   select
-    author_name, created_at, body
+    *
   from
     comments
   where
@@ -59,7 +59,7 @@ const getCommentsQuery = db.query<SlimComment, GetCommentsParams>(`
   order by
     created_at desc
   limit
-    10;"
+    10;
 `);
 
 export const getComments = (params: GetCommentsParams) => {
@@ -67,8 +67,29 @@ export const getComments = (params: GetCommentsParams) => {
   return comments;
 };
 
-type CreateCommentParams = Omit<FullComment, "created_at">;
-const createCommentQuery = db.query<FullComment, CreateCommentParams>(`
+type GetHostCommentsParams = {
+  hostname: string;
+};
+
+export const getHostCommentsQuery = db.query<Comment, GetHostCommentsParams>(`
+  select
+    *
+  from
+    comments
+  where
+    hostname = :hostname
+  order by
+    created_at desc
+  limit
+    10;
+`);
+
+export function getHostComments(params: GetHostCommentsParams) {
+  return getHostCommentsQuery.all(params);
+}
+
+type CreateCommentParams = Omit<Comment, "created_at">;
+const createCommentQuery = db.query<Comment, CreateCommentParams>(`
   insert into
     comments (id, hostname, pathname, body, author_name)
   values
@@ -78,7 +99,7 @@ const createCommentQuery = db.query<FullComment, CreateCommentParams>(`
 
 export const createComment = (
   params: Omit<CreateCommentParams, "id">,
-): FullComment => {
+): Comment => {
   const id = nanoid();
   const comment = createCommentQuery.get({
     ...params,

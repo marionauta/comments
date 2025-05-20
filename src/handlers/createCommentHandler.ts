@@ -1,7 +1,7 @@
 import logger from "@/logger.ts";
 import { getHostAndPathname, getServerHost } from "@/helpers/mod.ts";
 import type { HtmxServeHandler } from "@/htmx/preact/index.ts";
-import { CommentPublished, ServerErrorResponse } from "@/components/mod.tsx";
+import { CommentPublished } from "@/components/mod.tsx";
 import { sendTelegramMessage } from "@/telegram/mod.ts";
 import { createComment, isDomainAllowed } from "@/db/mod.ts";
 
@@ -12,25 +12,20 @@ export const createCommentHandler: HtmxServeHandler = async (
   const serverHost = getServerHost(request, server);
   const [hostname, pathname] = getHostAndPathname(request);
   if (!isDomainAllowed({ hostname })) {
-    logger.warn(`Hostname '${hostname}' not allowed.`);
-    return {
-      body: ServerErrorResponse({ serverHost }),
-    };
+    throw new Error(`Hostname '${hostname}' not allowed.`);
   }
   const data = await request.formData();
-  const body = data.get("comment");
+  let body = data.get("comment");
   if (typeof body !== "string") {
-    logger.warn("Comment body must be a string");
-    return {
-      body: ServerErrorResponse({ serverHost }),
-    };
+    throw new Error("Comment body must be a string");
+  }
+  body = body.trim();
+  if (body.length === 0) {
+    throw new Error("Comment body must not be empty");
   }
   const authorName = data.get("author-name");
   if (authorName && typeof authorName !== "string") {
-    logger.warn("Comment author name must be a string");
-    return {
-      body: ServerErrorResponse({ serverHost }),
-    };
+    throw new Error("Comment author name must be a string");
   }
   if (authorName !== null) {
     request.cookies.set({
