@@ -7,6 +7,9 @@ ExecStart=/var/www/comments/comments
 EnvironmentFile=/var/www/comments/environment
 Type=exec
 Restart=always
+# Uncomment to run with user
+# User=comments
+# Group=comments
 
 [Install]
 WantedBy=default.target
