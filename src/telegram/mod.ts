@@ -9,11 +9,11 @@ if (!client) {
   logger.warn("Missing `TELEGRAM_BOT_TOKEN`");
 }
 
-export async function sendTelegramMessage(message: string) {
+export async function sendTelegramMessage(message: string, url: string) {
   if (!client) return;
   if (!chatId || chatId.length === 0) {
     logger.warn("Missing `TELEGRAM_CHAT_ID`");
     return;
   }
-  await sendMessage(client, chatId, message);
+  await sendMessage(client, chatId, message, [[{ text: "Open comment", url }]]);
 }

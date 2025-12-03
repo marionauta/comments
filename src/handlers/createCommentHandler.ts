@@ -42,9 +42,10 @@ export const createCommentHandler: HtmxServeHandler = async (
     body,
     author_name: authorName,
   });
-  const update = `Comment by ${comment.author_name}: ${comment.body} @ ${hostname}${pathname}`;
+  const url = `${hostname}${pathname}`;
+  const update = `New comment by ${comment.author_name}:\n${comment.body}`;
   logger.info(update);
-  sendTelegramMessage(update);
+  sendTelegramMessage(update, url);
   return {
     body: CommentPublished({ serverHost, authorName }),
     init: {
