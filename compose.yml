@@ -1,0 +1,9 @@
+services:
+  comments:
+    image: nauta.one/comments
+    build: .
+    container_name: comments
+    ports:
+      - 8000:80
+    volumes:
+      - ./data:/data

@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "compile": "bun build --compile --outfile=comments --target=bun-linux-modern src/main.ts",
-    "deploy": "bash deploy.sh marioserver /var/www comments",
+    "compile": "bun build --compile --outfile=comments src/main.ts",
+    "serve": "bun run src/main.ts",
     "start": "PORT=8080 bun run --watch src/main.ts"
   },
   "devDependencies": {
